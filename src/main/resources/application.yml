@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: agentprobe
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/agentprobe
+    username: agentprobe
+    password: agentprobe
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true
+
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+
+server:
+  port: 8081
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
