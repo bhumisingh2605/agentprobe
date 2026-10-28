@@ -31,3 +31,9 @@ management:
   endpoint:
     health:
       show-details: never
+
+agentprobe:
+  jwt:
+    secret: ${JWT_SECRET:dev-only-secret-change-me-32-bytes-min!!}
+    access-token-minutes: 15
+    refresh-token-days: 7
