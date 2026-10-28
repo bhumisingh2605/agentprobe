@@ -37,3 +37,9 @@ agentprobe:
     secret: ${JWT_SECRET:dev-only-secret-change-me-32-bytes-min!!}
     access-token-minutes: 15
     refresh-token-days: 7
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
