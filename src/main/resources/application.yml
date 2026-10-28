@@ -1,3 +1,4 @@
+
 spring:
   application:
     name: agentprobe
@@ -37,6 +38,13 @@ agentprobe:
     secret: ${JWT_SECRET:dev-only-secret-change-me-32-bytes-min!!}
     access-token-minutes: 15
     refresh-token-days: 7
+
+  crypto:
+    key: ${ENCRYPTION_KEY:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=}
+
+  security:
+    allow-private-targets: ${ALLOW_PRIVATE_TARGETS:true}
+
 springdoc:
   api-docs:
     path: /v3/api-docs
