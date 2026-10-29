@@ -20,6 +20,13 @@ spring:
   ai:
     ollama:
       base-url: http://localhost:11434
+      chat:
+        options:
+          model: llama3.2:latest
+          temperature: 0.0
+      embedding:
+        options:
+          model: nomic-embed-text
 
 server:
   port: 8081
@@ -44,6 +51,9 @@ agentprobe:
 
   security:
     allow-private-targets: ${ALLOW_PRIVATE_TARGETS:true}
+
+  judge:
+    timeout-seconds: 120
 
 springdoc:
   api-docs:

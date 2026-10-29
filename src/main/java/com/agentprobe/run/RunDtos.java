@@ -36,7 +36,16 @@ public final class RunDtos {
         }
     }
 
-    public record EvaluationDto(String type, boolean passed, double score, double weight, String reasoning) {
+    public record EvaluationDto(
+            String type,
+            boolean passed,
+            double score,
+            double weight,
+            String reasoning,
+            String judgeModel,
+            String judgePromptVersion,
+            Integer judgeTokens,
+            Long judgeLatencyMs) {
     }
 
     public record ScenarioResultDto(
@@ -54,6 +63,7 @@ public final class RunDtos {
             List<EvaluationDto> evaluations) {
     }
 
-    public record RunDetail(RunSummary run, List<ScenarioResultDto> results) {
+    /** judgeTokens is an estimate (characters / 4) of tokens spent on judge calls in this run. */
+    public record RunDetail(RunSummary run, long judgeTokens, List<ScenarioResultDto> results) {
     }
 }

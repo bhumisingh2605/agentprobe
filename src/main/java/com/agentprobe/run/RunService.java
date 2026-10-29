@@ -27,9 +27,8 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Week 2 version: runs every scenario one after another inside the HTTP request (synchronous).
- * Not @Transactional on purpose, because agent calls are slow and must not hold a DB transaction.
- * Week 4 replaces this with a queue and workers.
+ * Synchronous run engine (Week 4 replaces it with a queue and workers).
+ * Not @Transactional on purpose: agent and judge calls are slow and must not hold a DB transaction.
  */
 @Service
 public class RunService {
@@ -159,8 +158,7 @@ public class RunService {
         ScenarioResult saved = results.save(r);
         List<EvaluationRecord> records = new ArrayList<EvaluationRecord>();
         for (Weighted w : evals) {
-            records.add(new EvaluationRecord(saved.getId(), w.result().type(), w.result().passed(),
-                    w.result().score(), w.weight(), w.result().reasoning()));
+            records.add(new EvaluationRecord(saved.getId(), w.result(), w.weight()));
         }
         evaluations.saveAll(records);
         return saved;
@@ -217,12 +215,17 @@ public class RunService {
         for (ScenarioResult r : resultList) {
             ids.add(r.getId());
         }
+        long judgeTokens = 0;
         Map<UUID, List<EvaluationDto>> byResult = new HashMap<UUID, List<EvaluationDto>>();
         if (!ids.isEmpty()) {
             for (EvaluationRecord e : evaluations.findAllByScenarioResultIdIn(ids)) {
+                if (e.getJudgeTokens() != null) {
+                    judgeTokens += e.getJudgeTokens();
+                }
                 byResult.computeIfAbsent(e.getScenarioResultId(), k -> new ArrayList<EvaluationDto>())
-                        .add(new EvaluationDto(e.getEvaluatorType(), e.isPassed(), e.getScore(),
-                                e.getWeight(), e.getReasoning()));
+                        .add(new EvaluationDto(e.getEvaluatorType(), e.isPassed(), e.getScore(), e.getWeight(),
+                                e.getReasoning(), e.getJudgeModel(), e.getJudgePromptVersion(),
+                                e.getJudgeTokens(), e.getJudgeLatencyMs()));
             }
         }
         List<ScenarioResultDto> dtos = new ArrayList<ScenarioResultDto>();
@@ -233,6 +236,6 @@ public class RunService {
                     Json.list(r.getToolCalls()), r.getError(),
                     evalDtos == null ? new ArrayList<EvaluationDto>() : evalDtos));
         }
-        return new RunDetail(RunSummary.from(run), dtos);
+        return new RunDetail(RunSummary.from(run), judgeTokens, dtos);
     }
 }
