@@ -1,0 +1,15 @@
+suite: Judge Test
+description: Checks that the LLM judge and embeddings work
+
+scenarios:
+  - id: judge_helpful
+    type: single_turn
+    input: "What is the status of order 1043?"
+    tags: [judge]
+    evaluators:
+      - type: llm_judge
+        rubric: helpfulness
+        threshold: 3
+      - type: similarity
+        reference: "Order 1043 has shipped and will arrive in 2 days."
+        threshold: 0.6
