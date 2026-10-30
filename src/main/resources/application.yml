@@ -1,4 +1,3 @@
-
 spring:
   application:
     name: agentprobe
@@ -61,3 +60,9 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     operations-sorter: method
+  runs:
+    max-concurrent-runs: 2
+    queue-size: 20
+    global-concurrency: 6
+    scenario-timeout-seconds: 300
+    retry-backoff-ms: 1000

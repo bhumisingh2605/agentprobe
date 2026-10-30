@@ -12,6 +12,8 @@ interface TestRunRepository extends JpaRepository<TestRun, UUID> {
     Optional<TestRun> findByIdAndProjectId(UUID id, UUID projectId);
 
     List<TestRun> findAllByProjectIdAndSuiteIdOrderByCreatedAtDesc(UUID projectId, UUID suiteId);
+
+    List<TestRun> findAllByStatusIn(Collection<String> statuses);
 }
 
 interface ScenarioResultRepository extends JpaRepository<ScenarioResult, UUID> {
@@ -22,4 +24,9 @@ interface ScenarioResultRepository extends JpaRepository<ScenarioResult, UUID> {
 interface EvaluationRecordRepository extends JpaRepository<EvaluationRecord, UUID> {
 
     List<EvaluationRecord> findAllByScenarioResultIdIn(Collection<UUID> ids);
+}
+
+interface TurnRecordRepository extends JpaRepository<TurnRecord, UUID> {
+
+    List<TurnRecord> findAllByScenarioResultIdInOrderByTurnNumberAsc(Collection<UUID> ids);
 }

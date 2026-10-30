@@ -1,5 +1,7 @@
 package com.agentprobe.run;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.Instant;
@@ -11,7 +13,12 @@ public final class RunDtos {
     private RunDtos() {
     }
 
-    public record StartRunRequest(@NotNull UUID agentId, @NotNull UUID versionId) {
+    /** concurrency: scenarios in parallel (default 3). tokenBudget: stop when agent+judge+simulator tokens (estimate) reach it. */
+    public record StartRunRequest(
+            @NotNull UUID agentId,
+            @NotNull UUID versionId,
+            @Min(1) @Max(8) Integer concurrency,
+            @Min(1000) Integer tokenBudget) {
     }
 
     public record RunSummary(
@@ -25,6 +32,9 @@ public final class RunDtos {
             double passRate,
             long avgLatencyMs,
             long totalTokens,
+            int concurrency,
+            Integer tokenBudget,
+            String error,
             Instant startedAt,
             Instant finishedAt) {
 
@@ -32,7 +42,8 @@ public final class RunDtos {
             double rate = r.getTotalScenarios() == 0 ? 0.0 : (double) r.getPassedCount() / r.getTotalScenarios();
             return new RunSummary(r.getId(), r.getSuiteId(), r.getAgentVersionId(), r.getStatus(),
                     r.getTotalScenarios(), r.getPassedCount(), r.getFailedCount(), rate,
-                    r.getAvgLatencyMs(), r.getTotalTokens(), r.getStartedAt(), r.getFinishedAt());
+                    r.getAvgLatencyMs(), r.getTotalTokens(), r.getConcurrency(), r.getTokenBudget(),
+                    r.getError(), r.getStartedAt(), r.getFinishedAt());
         }
     }
 
@@ -48,6 +59,9 @@ public final class RunDtos {
             Long judgeLatencyMs) {
     }
 
+    public record TurnDto(int number, String role, String content, Object toolCalls, long latencyMs) {
+    }
+
     public record ScenarioResultDto(
             UUID id,
             String scenarioId,
@@ -60,6 +74,9 @@ public final class RunDtos {
             String agentAnswer,
             Object toolCalls,
             String error,
+            String stopReason,
+            int turnCount,
+            List<TurnDto> turns,
             List<EvaluationDto> evaluations) {
     }
 

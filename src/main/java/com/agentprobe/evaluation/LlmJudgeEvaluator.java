@@ -61,7 +61,8 @@ public class LlmJudgeEvaluator implements Evaluator {
             }
         }
         try {
-            JudgeService.Verdict v = judge.judge(Rubrics.resolve(Params.string(p, "rubric")), ctx.input(),
+            String judgeInput = ctx.transcript() == null || ctx.transcript().isBlank() ? ctx.input() : ctx.transcript();
+            JudgeService.Verdict v = judge.judge(Rubrics.resolve(Params.string(p, "rubric")), judgeInput,
                     ctx.answer(), Json.write(ctx.toolCalls()), reference, votes);
             boolean passed = v.score() >= threshold;
             StringBuilder reasoning = new StringBuilder();

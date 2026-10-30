@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
 
+/** status: QUEUED, RUNNING, COMPLETED, FAILED, CANCELLED, BUDGET_EXCEEDED */
 @Entity
 @Table(name = "test_run")
 public class TestRun {
@@ -54,29 +55,52 @@ public class TestRun {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
+    @Column(columnDefinition = "text")
+    private String error;
+
+    @Column(name = "token_budget")
+    private Integer tokenBudget;
+
+    @Column(nullable = false)
+    private int concurrency;
+
     protected TestRun() {
     }
 
-    public TestRun(UUID projectId, UUID suiteId, UUID agentVersionId, int totalScenarios) {
+    public TestRun(UUID projectId, UUID suiteId, UUID agentVersionId, int totalScenarios,
+                   int concurrency, Integer tokenBudget) {
         this.projectId = projectId;
         this.suiteId = suiteId;
         this.agentVersionId = agentVersionId;
         this.totalScenarios = totalScenarios;
-        this.status = "RUNNING";
+        this.concurrency = concurrency;
+        this.tokenBudget = tokenBudget;
+        this.status = "QUEUED";
     }
 
-    public void finish(int passed, int failed, long avgLatencyMs, long totalTokens) {
+    public void markRunning() {
+        this.status = "RUNNING";
+        this.startedAt = Instant.now();
+    }
+
+    /** Live progress, called after every finished scenario. */
+    public void progress(int passed, int failed, long avgLatencyMs, long totalTokens) {
         this.passedCount = passed;
         this.failedCount = failed;
         this.avgLatencyMs = avgLatencyMs;
         this.totalTokens = totalTokens;
-        this.status = "COMPLETED";
+    }
+
+    /** Final state: COMPLETED, FAILED, CANCELLED or BUDGET_EXCEEDED. */
+    public void end(String status, String error, int passed, int failed, long avgLatencyMs, long totalTokens) {
+        progress(passed, failed, avgLatencyMs, totalTokens);
+        this.status = status;
+        this.error = error;
         this.finishedAt = Instant.now();
     }
 
-    public void markFailed() {
-        this.status = "FAILED";
-        this.finishedAt = Instant.now();
+    public boolean isActive() {
+        return "QUEUED".equals(status) || "RUNNING".equals(status);
     }
 
     public UUID getId() { return id; }
@@ -92,4 +116,7 @@ public class TestRun {
     public Instant getStartedAt() { return startedAt; }
     public Instant getFinishedAt() { return finishedAt; }
     public Instant getCreatedAt() { return createdAt; }
+    public String getError() { return error; }
+    public Integer getTokenBudget() { return tokenBudget; }
+    public int getConcurrency() { return concurrency; }
 }

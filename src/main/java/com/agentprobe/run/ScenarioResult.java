@@ -1,3 +1,4 @@
+
 package com.agentprobe.run;
 
 import jakarta.persistence.Column;
@@ -58,13 +59,20 @@ public class ScenarioResult {
     @Column(columnDefinition = "text")
     private String error;
 
+    @Column(name = "stop_reason", length = 40)
+    private String stopReason;
+
+    @Column(name = "turn_count", nullable = false)
+    private int turnCount = 1;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
     protected ScenarioResult() {
     }
 
-    public ScenarioResult(UUID runId, UUID scenarioId, String externalId, int position) {
+    public ScenarioResult(UUID runId, UUID scenarioId,
+                          String externalId, int position) {
         this.runId = runId;
         this.scenarioId = scenarioId;
         this.externalId = externalId;
@@ -77,27 +85,111 @@ public class ScenarioResult {
         this.error = error;
     }
 
-    public UUID getId() { return id; }
-    public UUID getRunId() { return runId; }
-    public UUID getScenarioId() { return scenarioId; }
-    public String getExternalId() { return externalId; }
-    public int getPosition() { return position; }
-    public boolean isPassed() { return passed; }
-    public void setPassed(boolean passed) { this.passed = passed; }
-    public double getScore() { return score; }
-    public void setScore(double score) { this.score = score; }
-    public long getLatencyMs() { return latencyMs; }
-    public void setLatencyMs(long latencyMs) { this.latencyMs = latencyMs; }
-    public Integer getTokens() { return tokens; }
-    public void setTokens(Integer tokens) { this.tokens = tokens; }
-    public int getHttpStatus() { return httpStatus; }
-    public void setHttpStatus(int httpStatus) { this.httpStatus = httpStatus; }
-    public String getUserMessage() { return userMessage; }
-    public void setUserMessage(String userMessage) { this.userMessage = userMessage; }
-    public String getAgentAnswer() { return agentAnswer; }
-    public void setAgentAnswer(String agentAnswer) { this.agentAnswer = agentAnswer; }
-    public String getToolCalls() { return toolCalls; }
-    public void setToolCalls(String toolCalls) { this.toolCalls = toolCalls; }
-    public String getError() { return error; }
-    public Instant getCreatedAt() { return createdAt; }
+    public UUID getId() {
+        return id;
+    }
+
+    public UUID getRunId() {
+        return runId;
+    }
+
+    public UUID getScenarioId() {
+        return scenarioId;
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public boolean isPassed() {
+        return passed;
+    }
+
+    public void setPassed(boolean passed) {
+        this.passed = passed;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
+    }
+
+    public long getLatencyMs() {
+        return latencyMs;
+    }
+
+    public void setLatencyMs(long latencyMs) {
+        this.latencyMs = latencyMs;
+    }
+
+    public Integer getTokens() {
+        return tokens;
+    }
+
+    public void setTokens(Integer tokens) {
+        this.tokens = tokens;
+    }
+
+    public int getHttpStatus() {
+        return httpStatus;
+    }
+
+    public void setHttpStatus(int httpStatus) {
+        this.httpStatus = httpStatus;
+    }
+
+    public String getUserMessage() {
+        return userMessage;
+    }
+
+    public void setUserMessage(String userMessage) {
+        this.userMessage = userMessage;
+    }
+
+    public String getAgentAnswer() {
+        return agentAnswer;
+    }
+
+    public void setAgentAnswer(String agentAnswer) {
+        this.agentAnswer = agentAnswer;
+    }
+
+    public String getToolCalls() {
+        return toolCalls;
+    }
+
+    public void setToolCalls(String toolCalls) {
+        this.toolCalls = toolCalls;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public String getStopReason() {
+        return stopReason;
+    }
+
+    public void setStopReason(String stopReason) {
+        this.stopReason = stopReason;
+    }
+
+    public int getTurnCount() {
+        return turnCount;
+    }
+
+    public void setTurnCount(int turnCount) {
+        this.turnCount = turnCount;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
 }
