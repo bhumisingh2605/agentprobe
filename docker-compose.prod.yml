@@ -35,7 +35,8 @@ services:
       SPRING_AI_OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:?set ENCRYPTION_KEY in .env}
-      ALLOW_PRIVATE_TARGETS: "false"
+      # Defaults to false. Set ALLOW_PRIVATE_TARGETS=true in .env ONLY for local testing.
+      ALLOW_PRIVATE_TARGETS: ${ALLOW_PRIVATE_TARGETS:-false}
       # Host names of agents that are allowed to resolve to private addresses (comma separated)
       AGENTPROBE_SECURITY_ALLOWED_HOSTS: shopbot
       AGENTPROBE_RATELIMIT_TRUST_FORWARDED_FOR: "true"
