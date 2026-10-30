@@ -2,3 +2,21 @@ logging:
   structured:
     format:
       console: ecs
+
+# Production never falls back to the development defaults from application.yml.
+# If JWT_SECRET or ENCRYPTION_KEY is missing, the application refuses to start.
+agentprobe:
+  jwt:
+    secret: ${JWT_SECRET}
+  crypto:
+    key: ${ENCRYPTION_KEY}
+  security:
+    # Private/internal targets stay blocked unless explicitly allowed.
+    allow-private-targets: ${ALLOW_PRIVATE_TARGETS:false}
+
+management:
+  server:
+    # Actuator (health, prometheus) runs on its own port. It is not published by
+    # docker-compose and not proxied by nginx, so only containers on the internal
+    # network (Prometheus) can reach it. The public port 8081 serves no /actuator.
+    port: ${MANAGEMENT_PORT:9081}

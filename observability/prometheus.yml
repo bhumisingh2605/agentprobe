@@ -5,4 +5,5 @@ scrape_configs:
   - job_name: agentprobe
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: ["agentprobe:8081"]
+      # Management port (see application-prod.yml), internal network only
+      - targets: ["agentprobe:9081"]
