@@ -30,3 +30,13 @@ interface TurnRecordRepository extends JpaRepository<TurnRecord, UUID> {
 
     List<TurnRecord> findAllByScenarioResultIdInOrderByTurnNumberAsc(Collection<UUID> ids);
 }
+
+interface BaselineRepository extends JpaRepository<Baseline, UUID> {
+
+    Optional<Baseline> findBySuiteIdAndAgentId(UUID suiteId, UUID agentId);
+
+    List<Baseline> findAllBySuiteId(UUID suiteId);
+}
+
+interface SuiteThresholdRepository extends JpaRepository<SuiteThreshold, UUID> {
+}

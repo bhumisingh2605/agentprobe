@@ -13,11 +13,16 @@ public final class RunDtos {
     private RunDtos() {
     }
 
-    /** concurrency: scenarios in parallel (default 3). tokenBudget: stop when agent+judge+simulator tokens (estimate) reach it. */
+    /**
+     * concurrency: scenarios in parallel (default 3).
+     * trials: how many times every scenario is executed (default 1, max 5). Use 3 to 5 to handle non-determinism.
+     * tokenBudget: stop when agent+judge+simulator tokens (estimate) reach it.
+     */
     public record StartRunRequest(
             @NotNull UUID agentId,
             @NotNull UUID versionId,
             @Min(1) @Max(8) Integer concurrency,
+            @Min(1) @Max(5) Integer trials,
             @Min(1000) Integer tokenBudget) {
     }
 
@@ -33,6 +38,7 @@ public final class RunDtos {
             long avgLatencyMs,
             long totalTokens,
             int concurrency,
+            int trials,
             Integer tokenBudget,
             String error,
             Instant startedAt,
@@ -42,8 +48,8 @@ public final class RunDtos {
             double rate = r.getTotalScenarios() == 0 ? 0.0 : (double) r.getPassedCount() / r.getTotalScenarios();
             return new RunSummary(r.getId(), r.getSuiteId(), r.getAgentVersionId(), r.getStatus(),
                     r.getTotalScenarios(), r.getPassedCount(), r.getFailedCount(), rate,
-                    r.getAvgLatencyMs(), r.getTotalTokens(), r.getConcurrency(), r.getTokenBudget(),
-                    r.getError(), r.getStartedAt(), r.getFinishedAt());
+                    r.getAvgLatencyMs(), r.getTotalTokens(), r.getConcurrency(), r.getTrials(),
+                    r.getTokenBudget(), r.getError(), r.getStartedAt(), r.getFinishedAt());
         }
     }
 
@@ -65,6 +71,7 @@ public final class RunDtos {
     public record ScenarioResultDto(
             UUID id,
             String scenarioId,
+            int trial,
             boolean passed,
             double score,
             long latencyMs,

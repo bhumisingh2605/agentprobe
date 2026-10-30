@@ -1,0 +1,12 @@
+.git
+.github
+.idea
+.vscode
+.env
+target
+cli/target
+ui
+docs
+observability
+*.md
+*.log

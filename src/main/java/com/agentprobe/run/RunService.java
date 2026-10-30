@@ -28,6 +28,7 @@ import java.util.UUID;
 public class RunService {
 
     private static final int MAX_SCENARIOS = 100;
+    private static final int MAX_EXECUTIONS = 300;
 
     private final SuiteService suiteService;
     private final AgentService agentService;
@@ -59,13 +60,26 @@ public class RunService {
         if (scenarioList.size() > MAX_SCENARIOS) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "A run can have at most " + MAX_SCENARIOS + " scenarios");
         }
+        int trials = req.trials() == null ? 1 : req.trials();
+        if ((long) scenarioList.size() * trials > MAX_EXECUTIONS) {
+            throw new ApiException(HttpStatus.BAD_REQUEST,
+                    "Scenarios x trials may not exceed " + MAX_EXECUTIONS + " executions per run");
+        }
         AgentTarget target = agentService.resolveTarget(projectId, req.agentId(), req.versionId(), userId);
 
+        // Queue order is trial by trial: all scenarios, then all scenarios again, ...
+        List<Scenario> expanded = new ArrayList<Scenario>();
+        for (int t = 0; t < trials; t++) {
+            expanded.addAll(scenarioList);
+        }
+
         int concurrency = req.concurrency() == null ? 3 : req.concurrency();
-        TestRun run = runs.save(new TestRun(projectId, suiteId, req.versionId(), scenarioList.size(),
-                concurrency, req.tokenBudget()));
+        TestRun run = new TestRun(projectId, suiteId, req.versionId(), expanded.size(),
+                concurrency, req.tokenBudget());
+        run.setTrials(trials);
+        run = runs.save(run);
         try {
-            executor.submit(run, scenarioList, target);
+            executor.submit(run, expanded, target);
         } catch (ApiException e) {
             run.end("FAILED", e.getMessage(), 0, 0, 0, 0);
             runs.save(run);
@@ -101,7 +115,6 @@ public class RunService {
     public SseEmitter subscribe(UUID projectId, UUID runId, UUID userId) {
         TestRun run = findRun(projectId, runId, userId);
         SseEmitter emitter = events.subscribe(runId, snapshot(run));
-        // The run may have finished between the read above and subscribing: close the stream in that case.
         TestRun fresh = runs.findById(runId).orElse(run);
         if (!fresh.isActive()) {
             events.publish(runId, "done", snapshot(fresh));
@@ -161,7 +174,7 @@ public class RunService {
         for (ScenarioResult r : resultList) {
             List<EvaluationDto> evalDtos = evalsByResult.get(r.getId());
             List<TurnDto> turnDtos = turnsByResult.get(r.getId());
-            dtos.add(new ScenarioResultDto(r.getId(), r.getExternalId(), r.isPassed(), r.getScore(),
+            dtos.add(new ScenarioResultDto(r.getId(), r.getExternalId(), r.getTrial(), r.isPassed(), r.getScore(),
                     r.getLatencyMs(), r.getTokens(), r.getHttpStatus(), r.getUserMessage(), r.getAgentAnswer(),
                     Json.list(r.getToolCalls()), r.getError(), r.getStopReason(), r.getTurnCount(),
                     turnDtos == null ? new ArrayList<TurnDto>() : turnDtos,

@@ -1,6 +1,7 @@
 package com.agentprobe.security;
 
 import com.agentprobe.api.ApiException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -10,20 +11,42 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 
 /**
- * Blocks internal targets when users register agent endpoints (SSRF).
- * allow-private-targets=true permits loopback/private ranges for local dev (ShopBot on localhost).
- * Link-local / cloud metadata (169.254.x.x) is blocked in every mode.
- * Known limit: DNS rebinding between check and connect (mention as future work in README).
+ * Blocks requests to internal addresses when users register their own agent endpoints (SSRF).
+ *
+ * - allow-private-targets=true permits loopback and private ranges (local development only).
+ * - allowed-hosts is a comma separated list of host names that may resolve to private addresses
+ *   (for example "shopbot" inside Docker). Everything else stays blocked.
+ * - Link-local / cloud metadata addresses (169.254.x.x), wildcard and multicast stay blocked in every mode.
+ *
+ * Known limit: DNS can change between this check and the connection (DNS rebinding).
+ * Pinning the resolved IP is future work.
  */
 @Component
 public class SsrfGuard {
 
     private final boolean allowPrivate;
+    private final Set<String> allowedHosts = new HashSet<String>();
 
-    public SsrfGuard(@Value("${agentprobe.security.allow-private-targets:false}") boolean allowPrivate) {
+    public SsrfGuard(boolean allowPrivate) {
+        this(allowPrivate, "");
+    }
+
+    @Autowired
+    public SsrfGuard(@Value("${agentprobe.security.allow-private-targets:false}") boolean allowPrivate,
+                     @Value("${agentprobe.security.allowed-hosts:}") String allowedHostsCsv) {
         this.allowPrivate = allowPrivate;
+        if (allowedHostsCsv != null) {
+            for (String h : allowedHostsCsv.split(",")) {
+                if (!h.isBlank()) {
+                    allowedHosts.add(h.trim().toLowerCase(Locale.ROOT));
+                }
+            }
+        }
     }
 
     public URI validate(String url) {
@@ -43,6 +66,7 @@ public class SsrfGuard {
         if (uri.getUserInfo() != null) {
             throw bad("Credentials inside the URL are not allowed; use the auth header fields");
         }
+        boolean hostAllowed = allowedHosts.contains(uri.getHost().toLowerCase(Locale.ROOT));
         InetAddress[] addresses;
         try {
             addresses = InetAddress.getAllByName(uri.getHost());
@@ -50,7 +74,7 @@ public class SsrfGuard {
             throw bad("Endpoint host could not be resolved");
         }
         for (InetAddress a : addresses) {
-            if (isBlocked(a)) {
+            if (isBlocked(a, hostAllowed)) {
                 throw bad("Endpoint resolves to a blocked (internal) address");
             }
         }
@@ -58,10 +82,14 @@ public class SsrfGuard {
     }
 
     boolean isBlocked(InetAddress a) {
+        return isBlocked(a, false);
+    }
+
+    boolean isBlocked(InetAddress a, boolean hostAllowed) {
         if (a.isAnyLocalAddress() || a.isMulticastAddress() || a.isLinkLocalAddress()) {
-            return true;
+            return true; // always blocked, includes 169.254.169.254 metadata endpoint
         }
-        if (allowPrivate) {
+        if (allowPrivate || hostAllowed) {
             return false;
         }
         if (a.isLoopbackAddress() || a.isSiteLocalAddress()) {
@@ -69,11 +97,12 @@ public class SsrfGuard {
         }
         byte[] b = a.getAddress();
         if (a instanceof Inet4Address) {
-            int b0 = b[0] & 0xFF, b1 = b[1] & 0xFF;
-            return b0 == 0 || (b0 == 100 && b1 >= 64 && b1 <= 127);
+            int b0 = b[0] & 0xFF;
+            int b1 = b[1] & 0xFF;
+            return b0 == 0 || (b0 == 100 && b1 >= 64 && b1 <= 127); // 0.0.0.0/8 and CGNAT 100.64.0.0/10
         }
         if (a instanceof Inet6Address) {
-            return (b[0] & 0xFE) == 0xFC;
+            return (b[0] & 0xFE) == 0xFC; // unique local fc00::/7
         }
         return false;
     }

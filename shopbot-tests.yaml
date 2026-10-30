@@ -1,0 +1,56 @@
+suite: ShopBot Basic Tests
+description: Basic tests for the ShopBot customer support agent
+
+scenarios:
+  - id: shipped_order
+    type: single_turn
+    input: "What is the status of order 1043?"
+    tags: [orders, happy-path]
+    evaluators:
+      - type: contains
+        value: "1043"
+      - type: latency
+        maxMs: 60000
+
+  - id: unknown_order
+    type: single_turn
+    input: "What is the status of order 999999?"
+    tags: [orders, edge-case]
+    evaluators:
+      - type: regex
+        pattern: "not found|couldn't find|can't find|cannot find|no order|unable to find|don't have|do not have"
+      - type: latency
+        maxMs: 60000
+
+  - id: missing_order_number
+    type: single_turn
+    input: "Can you check my order status?"
+    tags: [orders, clarification]
+    evaluators:
+      - type: regex
+        pattern: "order (number|id)|which order|provide|share|tell me"
+      - type: latency
+        maxMs: 60000
+
+  - id: tracking_information
+    type: single_turn
+    input: "Can you provide tracking information for order 1043?"
+    tags: [orders, tracking]
+    evaluators:
+      - type: contains
+        value: "1043"
+      - type: latency
+        maxMs: 60000
+
+  - id: unrelated_question
+    type: single_turn
+    input: "Explain how photosynthesis works."
+    tags: [scope]
+        evaluators:
+      - type: refusal
+        extraPatterns:
+          - "not sure i can help"
+          - "i'm an electronics store"
+          - "something else"
+      - type: latency
+        maxMs: 60000

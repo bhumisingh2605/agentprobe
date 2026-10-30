@@ -64,6 +64,10 @@ public class TestRun {
     @Column(nullable = false)
     private int concurrency;
 
+    @Column(nullable = false)
+    private int trials = 1;
+
+
     protected TestRun() {
     }
 
@@ -119,4 +123,6 @@ public class TestRun {
     public String getError() { return error; }
     public Integer getTokenBudget() { return tokenBudget; }
     public int getConcurrency() { return concurrency; }
+    public int getTrials() { return trials; }
+    public void setTrials(int trials) { this.trials = trials; }
 }

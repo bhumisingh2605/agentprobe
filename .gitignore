@@ -30,3 +30,11 @@ node_modules/
 .vscode/
 target/
 HELP.md
+
+target/
+.git/
+.idea/
+ui/node_modules/
+ui/dist/
+cli/target/
+*.log

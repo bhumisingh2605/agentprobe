@@ -1,0 +1,35 @@
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1c2430;--mute:#6b7685;--line:#e3e7ee;--pri:#2a5bd7;--ok:#1a7f4b;--warn:#b7791f;--bad:#c53030}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+header{display:flex;gap:16px;align-items:center;padding:10px 20px;background:#101828;color:#fff}
+header b{font-size:16px}header .sp{flex:1}
+nav.tabs{display:flex;gap:4px;padding:0 20px;background:#fff;border-bottom:1px solid var(--line)}
+nav.tabs button{border:0;background:none;padding:12px 14px;cursor:pointer;color:var(--mute);border-bottom:2px solid transparent;border-radius:0}
+nav.tabs button.on{color:var(--pri);border-color:var(--pri);font-weight:600}
+main{padding:20px;max-width:1200px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+h3{margin:0 0 10px}h4{margin:12px 0 6px}
+input,select,textarea,button{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px}
+textarea{width:100%;font-family:ui-monospace,monospace;font-size:12px}
+button{background:#fff;cursor:pointer}
+button.pri{background:var(--pri);color:#fff;border-color:var(--pri)}
+button.danger{color:var(--bad);border-color:var(--bad)}
+button:disabled{opacity:.5;cursor:default}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mute);font-weight:600;font-size:12px}
+tr.click{cursor:pointer}tr.click:hover{background:#f3f6fb}
+.badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;font-weight:600;background:#e9edf3}
+.badge.ok{background:#d9f2e4;color:var(--ok)}
+.badge.warn{background:#fdf0d2;color:var(--warn)}
+.badge.bad{background:#fbdcdc;color:var(--bad)}
+.mute{color:var(--mute)}.err{color:var(--bad);margin:6px 0}.ok{color:var(--ok)}
+.mono{font-family:ui-monospace,monospace;font-size:12px}
+.bubble{padding:6px 10px;border-radius:8px;margin:4px 0;white-space:pre-wrap}
+.bubble.customer{background:#e8efff}.bubble.agent{background:#f1f3f6}
+.bar{height:8px;background:#e9edf3;border-radius:4px;overflow:hidden;min-width:120px}
+.bar>i{display:block;height:100%;background:var(--pri)}
+.login{max-width:340px;margin:12vh auto}
+.login input{width:100%;margin-bottom:8px}

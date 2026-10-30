@@ -68,6 +68,9 @@ public class ScenarioResult {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
+    @Column(nullable = false)
+    private int trial = 1;
+
     protected ScenarioResult() {
     }
 
@@ -192,4 +195,7 @@ public class ScenarioResult {
     public Instant getCreatedAt() {
         return createdAt;
     }
+
+    public int getTrial() { return trial; }
+    public void setTrial(int trial) { this.trial = trial; }
 }
