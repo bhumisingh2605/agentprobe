@@ -20,3 +20,8 @@ management:
     # docker-compose and not proxied by nginx, so only containers on the internal
     # network (Prometheus) can reach it. The public port 8081 serves no /actuator.
     port: ${MANAGEMENT_PORT:9081}
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
