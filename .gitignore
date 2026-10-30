@@ -38,3 +38,5 @@ ui/node_modules/
 ui/dist/
 cli/target/
 *.log
+
+ui/.vite/
